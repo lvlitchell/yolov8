@@ -25,8 +25,8 @@ def _log_debug_samples(files, title='Debug Samples') -> None:
         title (str): A title that groups together images with the same values.
     """
     import re
-
-    if task := Task.current_task():
+    task = Task.current_task()
+    if task:
         for f in files:
             if f.exists():
                 it = re.search(r'_batch(\d+)', f.name)
@@ -62,7 +62,8 @@ def _log_plot(title, plot_path) -> None:
 def on_pretrain_routine_start(trainer):
     """Runs at start of pretraining routine; initializes and connects/ logs task to ClearML."""
     try:
-        if task := Task.current_task():
+        task = Task.current_task()
+        if task:
             # Make sure the automatic pytorch and matplotlib bindings are disabled!
             # We are logging these plots and model files manually in the integration
             PatchPyTorchModelIO.update_current_task(None)
@@ -85,7 +86,8 @@ def on_pretrain_routine_start(trainer):
 
 def on_train_epoch_end(trainer):
     """Logs debug samples for the first epoch of YOLO training and report current training progress."""
-    if task := Task.current_task():
+    task = Task.current_task()
+    if task:
         # Log debug samples
         if trainer.epoch == 1:
             _log_debug_samples(sorted(trainer.save_dir.glob('train_batch*.jpg')), 'Mosaic')
@@ -96,7 +98,8 @@ def on_train_epoch_end(trainer):
 
 def on_fit_epoch_end(trainer):
     """Reports model information to logger at the end of an epoch."""
-    if task := Task.current_task():
+    task = Task.current_task()
+    if task:
         # You should have access to the validation bboxes under jdict
         task.get_logger().report_scalar(title='Epoch Time',
                                         series='Epoch Time',
@@ -117,7 +120,8 @@ def on_val_end(validator):
 
 def on_train_end(trainer):
     """Logs final model and its name on training completion."""
-    if task := Task.current_task():
+    task = Task.current_task()
+    if task:
         # Log final results, CM matrix + PR plots
         files = [
             'results.png', 'confusion_matrix.png', 'confusion_matrix_normalized.png',
