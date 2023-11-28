@@ -4,9 +4,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
-from NYU_Dataset_Conversion import plot_polygon_on_image
+from data_processing.NYU_Dataset_Conversion import plot_polygon_on_image
 from types import SimpleNamespace
-import time
 
 mpl.use('TkAgg')
 
@@ -15,7 +14,7 @@ def train_model(data_yaml):
     # Load a model
     model = YOLO("yolov8m-seg.pt")  # load pretrained segmentation model
     # # train model
-    model.train(data=data_yaml, epochs=100,
+    model.train(data=data_yaml, epochs=150,
                 project="EgoHands",
                 name="Hand_Crops_imgsz_256",
                 imgsz=256
@@ -45,7 +44,7 @@ def get_inference_args():
 
 def test_model(weights_path, image_dir, show=False):
     image_dir = Path(image_dir)
-    save_dir = Path(image_dir).parent / "yolo_segs"
+    save_dir = Path(image_dir).parent / "yolo_segs_large_after_train"
     save_dir.mkdir(exist_ok=True, parents=True)
     assert image_dir.is_dir()
     # Load a model
@@ -78,9 +77,9 @@ def test_model(weights_path, image_dir, show=False):
 
 
 if __name__ == "__main__":
-    weights_path = "/home/inseer/engineering/yolov8/EgoHands/Hand_Crops_imgsz_256/weights/best.pt"
-    image_dir = "/home/inseer/data/Hand_Testing/Orientation/Mitchell_Waving/hand_crops"
-    test_model(weights_path, image_dir, show=True)
+    weights_path = "/home/inseer/engineering/yolov8/EgoHands/Large_Hand_Crops_imgsz_256_medium_fine_polys/weights/best.pt"
+    image_dir = "/home/inseer/data/Hand_Testing/Orientation/Mitchell_Waving/yolo_Hand_Crops_Small/yolo_hand_crops"
+    test_model(weights_path, image_dir, show=False)
     # data_yaml = "/home/inseer/Downloads/ego_hands_crops_yolov8/ego_hands_crops.yaml"
     # train_model(data_yaml)
 

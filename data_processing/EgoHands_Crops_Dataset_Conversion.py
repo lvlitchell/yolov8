@@ -50,7 +50,7 @@ def polygon_to_yolo_bbox(points, image_width, image_height):
     x_center = (x_min + x_max) / 2.0
     y_center = (y_min + y_max) / 2.0
     width = 1.25 * (x_max - x_min)
-    height = 1.25* (y_max - y_min)
+    height = 1.25 * (y_max - y_min)
     x_min = max(x_center - width/2, 0)
     x_max = min(x_center + width/2, image_width)
     y_min = max(y_center - height/2, 0)
@@ -66,8 +66,18 @@ def convert_polygon_2_crop_coords(polygon, bbox):
 
     return polygon
 
+def enlarg_box(bbox, H, W):
+    x_min, y_min, x_max, y_max = bbox
+    x_min = max(0, int(x_min*0.85))
+    y_min = max(0, int(y_min*0.85))
+    x_max = min(W, int(x_max*1.15))
+    y_max = min(H, int(y_max*1.15))
+
+    return [x_min, y_min, x_max, y_max]
+
 
 def crop_bbox(image, bbox):
+    H, W = image.shape[0:2]
     x_min, y_min, x_max, y_max = bbox
     crop = image[y_min:y_max, x_min:x_max]
 
@@ -106,7 +116,9 @@ def convert_Ego_Hand_to_Yolo(EgoHands_dir, EgoHands_yolov8_dir, mode="test"):
                 if len(hand) > 0:
                     # crop hand and save image
                     hand_bbox = polygon_to_yolo_bbox(hand, W, H)
+                    hand_bbox = enlarg_box(hand_bbox, H, W)
                     hand_image = crop_bbox(image, hand_bbox)
+
                     new_frame_name = f"{video_path.name}_hand{h_num}_{frame_path.name}"
                     new_frame_path = (image_save_dir / new_frame_name)
                     cv2.imwrite(new_frame_path.as_posix(), hand_image)
@@ -114,7 +126,8 @@ def convert_Ego_Hand_to_Yolo(EgoHands_dir, EgoHands_yolov8_dir, mode="test"):
                     hand = np.asarray(hand)
                     # normalize hand
                     hand = Polygon(hand)
-                    hand = hand.simplify(tolerance=2.5, preserve_topology=True)
+                    # simplify
+                    hand = hand.simplify(tolerance=1, preserve_topology=True)
                     hand = np.asarray(hand.exterior.coords)
                     hand = convert_polygon_2_crop_coords(hand, hand_bbox)
                     hand = [[round(coord[0] / hand_image.shape[1], 4), round(coord[1] / hand_image.shape[0], 4)] for coord in
