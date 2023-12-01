@@ -134,12 +134,13 @@ def test_yolo_annotation(image_dir, ann_dir):
             print(f"unable to load {image_file.name}, skipping!")
             continue
         txt_file = (ann_dir / image_file.with_suffix('.txt').name).as_posix()
-
+        print("txt_file name", txt_file)
         with open(txt_file, "r") as f:
             labels = f.read().splitlines()
 
         for label in labels:
             class_id, *poly = label.split(' ')
+            print("len of poly", len(poly))
             poly = np.asarray(poly, dtype=np.float16).reshape(-1, 2)  # Read poly, reshape
             print("number of pts in seg", poly.shape)
             poly *= [w, h]  # Unscale
@@ -184,11 +185,11 @@ def restructure_yolo_data(split="test"):
 
 
 if __name__ == "__main__":
-    split = "train"
+    split = "test"
     # dataset_dir = "/home/inseer/data/Hand_Testing/yolov8_seg/nyu_hand_bw/"
-    # image_dir = f"/home/inseer/data/Hand_Testing/yolov8_seg/nyu_hand_bw/images/{split}"
-    # ann_dir = f"/home/inseer/data/Hand_Testing/yolov8_seg/nyu_hand/annotations/{split}"
+    image_dir = f"/home/inseer/data/Hand_Testing/yolov8_seg/nyu_hand_bw/{split}/images"
+    ann_dir = f"/home/inseer/data/Hand_Testing/yolov8_seg/nyu_hand/annotations/{split}"
     # create_yolo_overview_txt(image_dir, dataset_dir)
-    restructure_yolo_data(split)
-
+    # restructure_yolo_data(split)
+    test_yolo_annotation(image_dir, ann_dir)
 
